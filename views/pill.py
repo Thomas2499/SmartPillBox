@@ -1,4 +1,5 @@
-from views.enums import ConsolePrintColor as color
+from views.enums import ConsolePrintColor as Color
+from views.consts import INVALID_INPUT_DELAY
 from presenters import PillPresenter
 import time
 
@@ -11,14 +12,14 @@ class PillView:
 
     @staticmethod
     def print_welcome_text():
-        print(f"{color.HEADER}*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*{color.ENDC}")
-        print(f"{color.HEADER}|              Smart PillBox              |{color.ENDC}")
-        print(f"{color.HEADER}*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*{color.ENDC}")
+        print(f"{Color.HEADER}*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*{Color.ENDC}")
+        print(f"{Color.HEADER}|              Smart PillBox              |{Color.ENDC}")
+        print(f"{Color.HEADER}*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*{Color.ENDC}")
 
     @staticmethod
     def print_not_valid_input(input_data):
-        print(f"{color.FAIL}\nThe input {input_data} is not a valid ID in the Smart PillBox database.{color.ENDC}")
-        time.sleep(3)
+        print(f"{Color.FAIL}\nThe input {input_data} is not a valid ID in the Smart PillBox database.{Color.ENDC}")
+        time.sleep(INVALID_INPUT_DELAY)
 
     @staticmethod
     def get_patient_id():
