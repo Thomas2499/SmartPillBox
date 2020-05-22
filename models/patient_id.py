@@ -7,4 +7,4 @@ class PatientIdModel:
 
     def get(self):
         data = self.__pill_dao.get("allowed_patients_ids")
-        return [pid[0] for pid in data]
+        return [patient_id[0] for patient_id in data]
