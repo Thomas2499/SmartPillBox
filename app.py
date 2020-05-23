@@ -1,4 +1,5 @@
 from pill_box_app import PillBoxApp
+import boto3
 
 
 def main():
