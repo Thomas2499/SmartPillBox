@@ -1,2 +1,2 @@
-from models.patient_id import PatientIdModel
+from models.patient import PatientModel
 from models.key import KeyModel

@@ -7,8 +7,7 @@ import time
 class PillView:
     def __init__(self):
         self.__pill_presenter = PillPresenter()
-        self.__patients_ids = self.__pill_presenter.get()
-        self.print_welcome_text()
+        self.__patients_ids = self.__pill_presenter.get_patients_ids()
 
     @staticmethod
     def print_welcome_text():
@@ -18,7 +17,7 @@ class PillView:
 
     @staticmethod
     def print_not_valid_input(input_data):
-        print(f"{Color.FAIL}\nThe input {input_data} is not a valid ID in the Smart PillBox database.{Color.ENDC}")
+        print(f"{Color.FAIL}\nThe input {input_data} is not a valid patient ID in the Smart PillBox database.{Color.ENDC}")
         time.sleep(INVALID_INPUT_DELAY)
 
     @staticmethod
@@ -27,5 +26,19 @@ class PillView:
 
     def validate_input_patient_id(self, input_id):
         return input_id in self.__patients_ids
+
+    def save_patient_id(self, patient_id):
+        self.__pill_presenter.patient_id = patient_id
+
+    def validate_safe_pills_combinations(self):
+        return self.__pill_presenter.validate_safe_pills_combinations()
+
+    def store_patient_prescription(self):
+        self.__pill_presenter.store_patient_prescription()
+        print(self.__pill_presenter.patient_prescription)
+
+    def send_alert(self):
+        pass
+
 
 

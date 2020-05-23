@@ -4,6 +4,8 @@ from pill_box_app import PillBoxApp
 def main():
     pill_box_app = PillBoxApp()
     pill_box_app.patient_authentication()
+    pill_box_app.validate_safe_pills_combinations()
+    pill_box_app.store_patient_prescription()
 
 
 if __name__ == '__main__':
