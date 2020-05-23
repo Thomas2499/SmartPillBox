@@ -1,5 +1,5 @@
 from views.enums import ConsolePrintColor as Color
-from views.consts import INVALID_INPUT_DELAY
+from views.consts import INVALID_INPUT_DELAY, WEEKDAYS
 from presenters import PillPresenter
 import time
 
@@ -37,8 +37,17 @@ class PillView:
         self.__pill_presenter.store_patient_prescription()
         print(self.__pill_presenter.patient_prescription)
 
+    def print_prescription(self):
+        for obtaining in self.__pill_presenter.patient_prescription:
+            print(f"{Color.OKBLUE}Obtain a medicine from box number {obtaining['Box_Id']}"
+                  f" on {WEEKDAYS[obtaining['Day_Id']]} at {obtaining['Hour_Id']}"
+                  f" by pressing {obtaining['Cell_id']}.{Color.ENDC}")
+
+    def validate_pill_obtaining(self, key):
+        return self.__pill_presenter.validate_input_key(key) and self.__pill_presenter.validate_input_key_timing(key)
+
     def send_alert(self):
-        pass
+        print('error')
 
 
 

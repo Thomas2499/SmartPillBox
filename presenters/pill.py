@@ -1,4 +1,5 @@
 from models import PatientModel
+from datetime import datetime
 from models import KeyModel
 import boto3
 import json
@@ -59,4 +60,20 @@ class PillPresenter:
         self.__refactor_day_number(prescription)
         self.patient_prescription = prescription
 
+    def retrieve_keys(self):
+        return [obtain["Cell_id"] for obtain in self.patient_prescription]
+
+    def validate_input_key(self, key):
+        prescription_keys = self.retrieve_keys()
+        if key.upper() not in prescription_keys:
+            return False
+        return True
+
+    def validate_input_key_timing(self, key):
+        prescription_by_key = list(filter(lambda row: row['Cell_id'] == key.upper(), self.patient_prescription))[0]
+        current_time = datetime.now()
+        timestamp = f"{current_time.hour}:{current_time.minute}"
+        if prescription_by_key['Hour_Id'] != timestamp or prescription_by_key['Day_Id'] != current_time.weekday():
+            return False
+        return True
 

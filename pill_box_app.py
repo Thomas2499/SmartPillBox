@@ -26,6 +26,15 @@ class PillBoxApp:
     def store_patient_prescription(self):
         self.__pill_view.store_patient_prescription()
 
-    #def listen_for_keyboard_keys(self):
+    def listen_for_keyboard_keys(self):
+        self.__pill_view.print_prescription()
+        while True:
+            key = input()
+            if not self.__pill_view.validate_pill_obtaining(key):
+                print("took pill not in the right timing")
+                self.__pill_view.send_alert()
+            else:
+                print("took pill in the right timing")
+
 
 
