@@ -46,8 +46,14 @@ class PillView:
     def validate_pill_obtaining(self, key):
         return self.__pill_presenter.validate_input_key(key) and self.__pill_presenter.validate_input_key_timing(key)
 
+    def update_obtaining(self, key):
+        self.__pill_presenter.update_obtaining(key)
+
+    def start_event_listener(self):
+        self.__pill_presenter.start_event_listener()
+
     def send_alert(self):
-        print('error')
+        self.__pill_presenter.send_alert()
 
 
 

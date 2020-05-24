@@ -1,6 +1,8 @@
 from models import PatientModel
 from datetime import datetime
 from models import KeyModel
+import time
+import threading
 import boto3
 import json
 
@@ -11,6 +13,7 @@ class PillPresenter:
         self.__patient_model = PatientModel()
         self.__patient_id = None
         self.__patient_prescription = None
+        self.__timestamps = None
 
     @property
     def patient_id(self):
@@ -43,6 +46,14 @@ class PillPresenter:
             prescription[i]["Day_Id"] = day_id - 2 if day_id != 1 else 6
         return prescription
 
+    @staticmethod
+    def __add_obtained_prescription_field(prescription):
+        updated_prescription = []
+        for row in prescription:
+            row.update({"obtained": False})
+            updated_prescription.append(row)
+        return updated_prescription
+
     def get_patients_ids(self):
         data = self.__patient_model.get_ids()
         return data
@@ -57,7 +68,8 @@ class PillPresenter:
 
     def store_patient_prescription(self):
         prescription = self.__patient_model.get_prescription(self.patient_id)
-        self.__refactor_day_number(prescription)
+        prescription = self.__refactor_day_number(prescription)
+        prescription = self.__add_obtained_prescription_field(prescription)
         self.patient_prescription = prescription
 
     def retrieve_keys(self):
@@ -72,8 +84,48 @@ class PillPresenter:
     def validate_input_key_timing(self, key):
         prescription_by_key = list(filter(lambda row: row['Cell_id'] == key.upper(), self.patient_prescription))[0]
         current_time = datetime.now()
-        timestamp = f"{current_time.hour}:{current_time.minute}"
-        if prescription_by_key['Hour_Id'] != timestamp or prescription_by_key['Day_Id'] != current_time.weekday():
+        timestamp = "8:30"
+        if prescription_by_key['Hour_Id'] != timestamp or prescription_by_key['obtained'] is True:
+                #or prescription_by_key['Day_Id'] != current_time.weekday()
             return False
         return True
+
+    def update_obtaining(self, key):
+        for i in range(len(self.patient_prescription)):
+            if self.patient_prescription[i]["Cell_id"] == key:
+                self.patient_prescription[i]["obtained"] = True
+        print(self.patient_prescription)
+
+    def send_alert(self):
+        pass
+
+    def __extract_timestamps(self):
+        prescription = self.__patient_prescription
+        self.__timestamps = [f"{row['Day_id']}:{row['Hour_Id']}" for row in prescription]
+
+    def __is_prescription_not_fully_obtained(self):
+        prescription = self.patient_prescription
+        obtained = [row["obtained"] for row in prescription]
+        return not all(obtained)
+
+    def is_obtained_on_time(self, day, hour_with_min):
+        current_prescription = list(filter(lambda row: row["Day_Id"] == day and row["Hour_Id"] == hour_with_min,
+                                           self.patient_prescription))[0]
+        if not current_prescription["obtained"]:
+            return False
+        return True
+
+    def assurance_listener(self):
+        self.__extract_timestamps()
+        while self.__is_prescription_not_fully_obtained():
+            current_time = datetime.now()
+            timestamp = f"{current_time.weekday()}:{current_time.hour}:{current_time.minute}"
+            if timestamp in self.__timestamps:
+                time.sleep(60)
+                day, hour_with_min = timestamp.split(':', 1)
+                if not self.is_obtained_on_time(day, hour_with_min):
+                    print('you missed!')
+            time.sleep(1)
+
+
 

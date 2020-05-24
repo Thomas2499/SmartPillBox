@@ -20,14 +20,14 @@ class PillBoxApp:
     def validate_safe_pills_combinations(self):
         if not self.__pill_view.validate_safe_pills_combinations():
             self.__pill_view.send_alert()
-        else:
-            self.__pill_view.send_alert()
+            exit()
 
     def store_patient_prescription(self):
         self.__pill_view.store_patient_prescription()
 
     def listen_for_keyboard_keys(self):
         self.__pill_view.print_prescription()
+        self.__pill_view.start_thread_listener()
         while True:
             key = input()
             if not self.__pill_view.validate_pill_obtaining(key):
@@ -35,6 +35,7 @@ class PillBoxApp:
                 self.__pill_view.send_alert()
             else:
                 print("took pill in the right timing")
+                self.__pill_view.update_obtaining(key)
 
 
 
