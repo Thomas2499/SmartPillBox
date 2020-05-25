@@ -1,4 +1,5 @@
 from views import PillView
+import threading
 import json
 
 
@@ -27,15 +28,19 @@ class PillBoxApp:
 
     def listen_for_keyboard_keys(self):
         self.__pill_view.print_prescription()
-        self.__pill_view.start_thread_listener()
+        t = threading.Thread(target=self.__pill_view.start_event_listener)
+        t.start()
         while True:
-            key = input()
+            key = input().upper()
+            if not t.is_alive():
+                break
             if not self.__pill_view.validate_pill_obtaining(key):
                 print("took pill not in the right timing")
                 self.__pill_view.send_alert()
             else:
                 print("took pill in the right timing")
                 self.__pill_view.update_obtaining(key)
+        print("t is dead")
 
 
 

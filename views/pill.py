@@ -50,7 +50,7 @@ class PillView:
         self.__pill_presenter.update_obtaining(key)
 
     def start_event_listener(self):
-        self.__pill_presenter.start_event_listener()
+        self.__pill_presenter.assurance_listener()
 
     def send_alert(self):
         self.__pill_presenter.send_alert()
