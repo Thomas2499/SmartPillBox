@@ -52,8 +52,8 @@ class PillView:
     def start_event_listener(self):
         self.__pill_presenter.assurance_listener()
 
-    def send_alert(self):
-        self.__pill_presenter.send_alert()
+    def send_alert(self, message):
+        self.__pill_presenter.send_alert(message)
 
 
 

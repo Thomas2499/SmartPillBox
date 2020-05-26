@@ -36,7 +36,7 @@ class PillBoxApp:
                 break
             if not self.__pill_view.validate_pill_obtaining(key):
                 print("took pill not in the right timing")
-                self.__pill_view.send_alert()
+                self.__pill_view.send_alert(message="took pill not in the right timing")
             else:
                 print("took pill in the right timing")
                 self.__pill_view.update_obtaining(key)

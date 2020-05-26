@@ -2,10 +2,11 @@ from presenters.consts import WAITING_SECONDS
 from models import PatientModel
 from datetime import datetime
 from models import KeyModel
-import threading
-import time
 import boto3
-import json
+import time
+
+
+sns = boto3.client('sns', region_name="us-east-1")
 
 
 class PillPresenter:
@@ -79,6 +80,7 @@ class PillPresenter:
     def validate_input_key(self, key):
         prescription_keys = self.retrieve_keys()
         if key not in prescription_keys:
+            print("You've pressed an invalid key")
             return False
         return True
 
@@ -99,17 +101,13 @@ class PillPresenter:
             if self.patient_prescription[i]["Cell_id"] == key:
                 self.patient_prescription[i]["obtained"] = True
 
-    def send_alert(self):
-        pass
-
     def __extract_timestamps(self):
         prescription = self.__patient_prescription
         self.__timestamps = [f"{row['Day_Id']}:{row['Hour_Id']}" for row in prescription]
 
-    def __is_prescription_not_fully_obtained(self):
-        prescription = self.patient_prescription
-        obtained = [row["obtained"] for row in prescription]
-        return not any(obtained)
+    def __is_prescription_time_passed(self, timestamp):
+        last_prescription_time = self.__timestamps[len(self.__timestamps) - 1]
+        return last_prescription_time == timestamp
 
     def __is_obtained_on_time(self, day, hour_with_min):
         current_prescription = list(filter(lambda row: row["Day_Id"] == day and row["Hour_Id"] == hour_with_min,
@@ -119,10 +117,10 @@ class PillPresenter:
         return True
 
     def assurance_listener(self):
-        self.patient_prescription[0]["Day_Id"] = '0'
-        self.patient_prescription[0]["Hour_Id"] = '23:43'
+        self.patient_prescription[len(self.patient_prescription) - 1]["Day_Id"] = '2'
+        self.patient_prescription[len(self.patient_prescription) - 1]["Hour_Id"] = '0:24'
         self.__extract_timestamps()
-        while self.__is_prescription_not_fully_obtained():
+        while True:
             current_time = datetime.now()
             timestamp = f"{current_time.weekday()}:{current_time.hour}:{0 if current_time.minute < 10 else ''}" \
                         f"{current_time.minute}"
@@ -130,6 +128,12 @@ class PillPresenter:
                 time.sleep(WAITING_SECONDS)
                 day, hour_with_min = timestamp.split(':', 1)
                 if not self.__is_obtained_on_time(day, hour_with_min):
-                    print(f"you missed! on {day}  {hour_with_min}")
-                    self.send_alert()
+                    print("missed!")
+                    self.send_alert(message=f"you missed! on {day}  {hour_with_min}")
+                if self.__is_prescription_time_passed(timestamp):
+                    break
             time.sleep(5)
+
+    @staticmethod
+    def send_alert(message):
+        sns.publish(PhoneNumber='+972527213340', Message=message)
