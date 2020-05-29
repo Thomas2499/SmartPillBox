@@ -17,10 +17,14 @@ class PatientModel:
         data = self.__pill_dao.get("allowed_patients_ids", format=None)
         return [row[0] for row in data[0]]
 
-    def get_combinations(self, patient_id):
-        data, columns = self.__pill_dao.get("patient_pills_combinations", format=patient_id)
+    def get_name_by_id(self, pid):
+        data = self.__pill_dao.get("patient_name", format=pid)
+        return data[0][0]
+
+    def get_combinations(self, pid):
+        data, columns = self.__pill_dao.get("patient_pills_combinations", format=pid)
         return self.__map_data_to_columns__(data, columns)
 
-    def get_prescription(self, patient_id):
-        data, columns = self.__pill_dao.get("patient_prescription", format=patient_id)
+    def get_prescription(self, pid):
+        data, columns = self.__pill_dao.get("patient_prescription", format=pid)
         return self.__map_data_to_columns__(data, columns)

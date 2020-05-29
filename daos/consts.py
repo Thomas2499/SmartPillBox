@@ -7,6 +7,7 @@ PASSWORD = "machete"
 QUERIES = {
     "allowed_keyboard_keys": "SELECT Cell_Id FROM dbo.Cell",
     "allowed_patients_ids": "SELECT Pateint_Id from dbo.Caregiver_Patient",
+    "patient_name": "SELECT First_Name from dbo.Person WHERE Person_Id='{0}'",
     "patient_pills_combinations": "select Person.Phone_number, Constraint_ATC.Does_not_Combine_With,"
                                   " ATC5.Active_component FROM Prescription"
                                   " inner join Constraint_ATC on Constraint_ATC.Drug_Id=Prescription.Drug_Id"

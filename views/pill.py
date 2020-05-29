@@ -30,6 +30,9 @@ class PillView:
     def save_patient_id(self, patient_id):
         self.__pill_presenter.patient_id = patient_id
 
+    def save_patient_name(self, patient_id):
+        self.__pill_presenter.save_patient_name(patient_id)
+
     def validate_safe_pills_combinations(self):
         return self.__pill_presenter.validate_safe_pills_combinations()
 
