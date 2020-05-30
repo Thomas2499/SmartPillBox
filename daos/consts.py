@@ -15,9 +15,11 @@ QUERIES = {
                                   " inner join Person on Person.Person_Id=Prescription.Caregiver_Id"
                                   " where Pateint_Id='{0}'",
     "patient_prescription": "SELECT Person.First_Name, Person.Phone_number,"
-                            " Box.Date_received, Collect.Box_Id, Collect.Cell_id, Collect.Day_Id, Collect.Hour_Id"
+                            " Box.Date_received, Collect.Collect_Id, Collect.is_obtained, Collect.Box_Id,"
+                            " Collect.Cell_id, Collect.Day_Id, Collect.Hour_Id"
                             " FROM Collect inner join Box ON Collect.Box_Id=Box.Box_ID"
                             " inner join Person ON Box.Caregiver_Id=Person.Person_Id"
                             " Where Box.pateint_id='{0}'"
-                            " Order by Box.Date_received"
+                            " Order by Box.Date_received",
+    "update_patient_obtain": "UPDATE dbo.Collect SET is_obtained='{0}' WHERE Collect.Collect_Id='{1}'"
 }

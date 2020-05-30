@@ -11,7 +11,11 @@ class PillDAO:
 
         self.__cursor = self.__conn.cursor()
 
-    def get(self, query_key: str, **kwargs):
+    def get(self, query_key, **kwargs):
         self.__cursor.execute(consts.QUERIES[query_key].format(kwargs["format"]))
         columns_names = [desc[0] for desc in self.__cursor.description]
         return self.__cursor.fetchall(), columns_names
+
+    def update(self, query_key, **kwargs):
+        self.__cursor.execute(consts.QUERIES[query_key].format(*kwargs["format"]))
+        self.__conn.commit()

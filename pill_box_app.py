@@ -27,9 +27,9 @@ class PillBoxApp:
             exit()
 
     def listen_for_keyboard_keys(self):
-        self.__pill_view.print_prescription()
         t = threading.Thread(target=self.__pill_view.start_event_listener)
         t.start()
+        self.__pill_view.print_prescription()
         while True:
             key = input().upper()
             if not t.is_alive():

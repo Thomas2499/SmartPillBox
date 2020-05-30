@@ -28,3 +28,7 @@ class PatientModel:
     def get_prescription(self, pid):
         data, columns = self.__pill_dao.get("patient_prescription", format=pid)
         return self.__map_data_to_columns__(data, columns)
+
+    def update_prescription_obtain(self, *args):
+        print(args)
+        self.__pill_dao.update("update_patient_obtain", format=args)

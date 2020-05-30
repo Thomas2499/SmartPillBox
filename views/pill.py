@@ -38,12 +38,11 @@ class PillView:
 
     def store_patient_prescription(self):
         self.__pill_presenter.store_patient_prescription()
-        print(self.__pill_presenter.patient_prescription)
 
     def print_prescription(self):
         for obtaining in self.__pill_presenter.patient_prescription:
             print(f"{Color.OKBLUE}Obtain a medicine from box number {obtaining['Box_Id']}"
-                  f" on {WEEKDAYS[obtaining['Day_Id']]} at {obtaining['Hour_Id']}"
+                  f" on {WEEKDAYS[int(obtaining['Day_Id'])]} at {obtaining['Hour_Id']}"
                   f" by pressing {obtaining['Cell_id']}.{Color.ENDC}")
 
     def validate_pill_obtaining(self, key):

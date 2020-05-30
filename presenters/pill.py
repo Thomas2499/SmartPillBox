@@ -1,6 +1,6 @@
-from presenters.consts import WAITING_SECONDS
+from presenters.consts import WAITING_SECONDS, ISRAEL_CALLING_CODE
 from models import PatientModel
-from datetime import datetime
+from datetime import datetime, timedelta
 from models import KeyModel
 import calendar
 import boto3
@@ -89,17 +89,28 @@ class PillPresenter:
             return False
         return True
 
+    @staticmethod
+    def __retrieve_time_borders(prescription):
+        current_time = datetime.now()
+        current_timestamp = datetime.strptime(
+            f"{current_time.weekday() + 1}:{current_time.hour}:{0 if current_time.minute < 10 else ''}"
+            f"{current_time.minute}", '%d:%H:%M')
+        prescription_timestamp = datetime.strptime(
+            f"{prescription['Day_Id'] + 1}:{prescription['Hour_Id']}", '%d:%H:%M')
+        border_timestamp = prescription_timestamp + timedelta(minutes=WAITING_SECONDS / 60)
+        return current_timestamp, prescription_timestamp, border_timestamp
+
     def validate_input_key_timing(self, key):
         prescription_by_key = list(filter(lambda row: row['Cell_id'] == key, self.patient_prescription))[0]
-        current_time = datetime.now()
-        timestamp = f"{current_time.hour}:{0 if current_time.minute < 10 else ''}{current_time.minute}"
         message_time = f"{calendar.day_name[int(prescription_by_key['Day_Id'])]} at {prescription_by_key['Hour_Id']}."
+
         if prescription_by_key['obtained'] is True:
-            print("pill already obtained")
             self.send_alert(message=f"obtained the same pill from box number {prescription_by_key['Box_Id']}"
                             f" originally obtained on {message_time}")
             return False
-        if prescription_by_key['Hour_Id'] != timestamp or prescription_by_key['Day_Id'] != str(current_time.weekday()):
+
+        current_timestamp, prescription_timestamp, border_timestamp = self.__retrieve_time_borders(prescription_by_key)
+        if not prescription_timestamp < current_timestamp < border_timestamp:
             self.send_alert(message=f"obtained a pill not at the right timing. {self.__patient_name} "
                                     f"should've obtained it on {message_time}")
             return False
@@ -122,38 +133,34 @@ class PillPresenter:
         current_prescription = list(filter(lambda row: row["Day_Id"] == day and row["Hour_Id"] == hour_with_min,
                                            self.patient_prescription))[0]
         if not current_prescription["obtained"]:
-            print("miss")
-            return False
-        print("no miss")
-        return True
+            return False, current_prescription
+        return True, current_prescription
 
     def assurance_listener(self):
-        for i in range(len(self.patient_prescription)):
-            self.patient_prescription[i]["Day_Id"] = '5'
-            self.patient_prescription[i]["Hour_Id"] = f"1:0{i}"
-        print(self.patient_prescription)
         self.__extract_timestamps()
         while True:
             current_time = datetime.now()
-            timestamp = f"{current_time.weekday() + 1}:{current_time.hour}:{0 if current_time.minute < 10 else ''}" \
+            timestamp = f"{current_time.weekday()}:{current_time.hour}:{0 if current_time.minute < 10 else ''}" \
                         f"{current_time.minute}"
             if timestamp in self.__timestamps:
                 time.sleep(WAITING_SECONDS)
                 day, hour_with_min = timestamp.split(':', 1)
-                obtained = self.__is_obtained_on_time(day, hour_with_min)
+                obtained, current_prescription = self.__is_obtained_on_time(day, hour_with_min)
                 if not obtained:
-                    print("missed")
-                    self.send_alert(message=f"did not obtain a pill on {calendar.day_name[int(day) - 1]},"
+                    self.send_alert(message=f"did not obtain a pill on {calendar.day_name[int(day)]},"
                                             f" {hour_with_min}.")
+                self.__store_obtained(obtained, current_prescription['Collect_Id'])
                 if self.__is_prescription_time_passed(timestamp):
                     break
             time.sleep(5)
         self.send_alert(message=f"finished. test complete!")
 
-    @staticmethod
-    def __send_alert(message):
-        #self.patient_prescription[0]['Phone_number']
-        sns.publish(PhoneNumber='+972527213340', Message=message)
+    def __store_obtained(self, is_obtained, collect_id):
+        self.__patient_model.update_prescription_obtain(is_obtained, collect_id)
+
+    def __send_alert(self, message):
+        phone_number = f"{ISRAEL_CALLING_CODE}{self.patient_prescription[0]['Phone_number'][1:]}"
+        sns.publish(PhoneNumber=phone_number, Message=message)
 
     def send_alert(self, message):
         sms_template = f"Hello {self.patient_prescription[0]['First_Name']}, your patient - {self.__patient_name}, "
