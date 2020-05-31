@@ -12,3 +12,5 @@ venv/Lib/tcl8.6/
 venv/
 
 views/__pycache__/
+
+presenters/__pycache__/pill.cpython-37.pyc

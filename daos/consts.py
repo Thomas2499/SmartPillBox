@@ -1,3 +1,4 @@
+DRIVER = "ODBC Driver 17 for SQL Server"
 USERNAME = "DESKTOP-CGQADNQ\Tomer"
 DATABASE = "smart_pill_box2"
 SERVER = "DESKTOP-CGQADNQ"

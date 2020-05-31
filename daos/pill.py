@@ -1,13 +1,15 @@
 from daos import consts
-import pymssql
+import pyodbc
 
 
 class PillDAO:
     def __init__(self):
-        self.__conn = pymssql.connect(server=consts.SERVER,
-                                      user=consts.USERNAME,
-                                      password=consts.PASSWORD,
-                                      database=consts.DATABASE)
+        self.__conn = pyodbc.connect(f'DRIVER={consts.DRIVER};'
+                                     f'SERVER={consts.SERVER};'
+                                     f'DATABASE={consts.DATABASE};'
+                                     f'UID={consts.USERNAME};'
+                                     f'PWD={consts.PASSWORD};'
+                                     f'Trusted_Connection=yes;')
 
         self.__cursor = self.__conn.cursor()
 
