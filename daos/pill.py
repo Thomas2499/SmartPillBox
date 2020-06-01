@@ -1,5 +1,5 @@
 from daos import consts
-import pyodbc
+import pyodbc  # library for working with sql server
 
 
 class PillDAO:
@@ -9,14 +9,14 @@ class PillDAO:
                                      f'DATABASE={consts.DATABASE};'
                                      f'UID={consts.USERNAME};'
                                      f'PWD={consts.PASSWORD};'
-                                     f'Trusted_Connection=yes;')
+                                     f'Trusted_Connection=yes;')  # connection to the database
 
-        self.__cursor = self.__conn.cursor()
+        self.__cursor = self.__conn.cursor()  # enable query execute
 
     def get(self, query_key, **kwargs):
-        self.__cursor.execute(consts.QUERIES[query_key].format(kwargs["format"]))
-        columns_names = [desc[0] for desc in self.__cursor.description]
-        return self.__cursor.fetchall(), columns_names
+        self.__cursor.execute(consts.QUERIES[query_key].format(kwargs["format"]))  # running the query
+        columns_names = [desc[0] for desc in self.__cursor.description]  # extract columns names from result
+        return self.__cursor.fetchall(), columns_names  # return row values with columns names
 
     def update(self, query_key, **kwargs):
         self.__cursor.execute(consts.QUERIES[query_key].format(*kwargs["format"]))
