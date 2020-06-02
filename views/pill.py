@@ -51,7 +51,7 @@ class PillView:
     def update_obtaining(self, key):
         self.__pill_presenter.update_obtaining(key)
 
-    def start_event_listener(self):
+    def start_event_listener(self):  # starts the system listener to check if pill obtaining is missing.
         self.__pill_presenter.assurance_listener()
 
     def send_alert(self, message):

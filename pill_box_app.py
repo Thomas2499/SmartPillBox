@@ -7,7 +7,7 @@ class PillBoxApp:
         self.__pill_view = PillView()
         self.__pill_view.print_welcome_text()
 
-    def patient_authentication(self):
+    def patient_authentication(self):  # checks if the patient input is a valid patient id
         empty_id = True
         while empty_id:
             input_data = self.__pill_view.get_patient_id()
@@ -26,7 +26,7 @@ class PillBoxApp:
             self.__pill_view.send_alert(message="does not have a safe pills combination in the prescription.")
             exit()  # exit from the system
 
-    def listen_for_keyboard_keys(self):
+    def listen_for_keyboard_keys(self):  # listener to check pill obtaining
         t = threading.Thread(target=self.__pill_view.start_event_listener)  # creating another thread for checking if pill missed
         t.start()  # starting the thread.
         self.__pill_view.print_prescription()

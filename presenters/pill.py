@@ -122,39 +122,38 @@ class PillPresenter:
             if self.patient_prescription[i]["Cell_id"] == key:  # update obtaining to true in temporary database
                 self.patient_prescription[i]["obtained"] = True
 
-    def __extract_timestamps(self):
+    def __extract_timestamps(self):  # build from prescription time - a timestamp => 1:20:30
         prescription = self.patient_prescription
-        self.__timestamps = [f"{row['Day_Id']}:{row['Hour_Id']}" for row in prescription]
+        self.__timestamps = [f"{row['Day_Id']}:{row['Hour_Id']}" for row in prescription]  # create list of timestamps
 
-    def __is_prescription_time_passed(self, timestamp):
-        last_prescription_time = self.__timestamps[len(self.__timestamps) - 1]
+    def __is_prescription_time_passed(self, timestamp):  # checks if it's now the last obtaining time
+        last_prescription_time = self.__timestamps[len(self.__timestamps) - 1]  # takes the last timestamp from temporary db
         return last_prescription_time == timestamp
 
-    def __is_obtained_on_time(self, day, hour_with_min):
+    def __is_obtained_on_time(self, day, hour_with_min):  # checks if obtain pill on time
         current_prescription = list(filter(lambda row: row["Day_Id"] == day and row["Hour_Id"] == hour_with_min,
-                                           self.patient_prescription))[0]
-        if not current_prescription["obtained"]:
+                                           self.patient_prescription))[0]  # filter the obtaining for the current time.
+        if not current_prescription["obtained"]:  # checks if obtain is true or false
             return False, current_prescription
         return True, current_prescription
 
-    def assurance_listener(self):
+    def assurance_listener(self):  # checks if at the end of obtaining time (8:30 => 9:00) patient didn't take a pill
         self.__extract_timestamps()
         while True:
-            current_time = datetime.now()
+            current_time = datetime.now()  # gets the time right now
             timestamp = f"{current_time.weekday()}:{current_time.hour}:{0 if current_time.minute < 10 else ''}" \
-                        f"{current_time.minute}"
-            if timestamp in self.__timestamps:
-                time.sleep(WAITING_SECONDS)
-                day, hour_with_min = timestamp.split(':', 1)
+                        f"{current_time.minute}"  # Monday 8:30 => 0:8:30
+            if timestamp in self.__timestamps:  # checks if it is time to take pill
+                time.sleep(WAITING_SECONDS)  # the thread waiting 30 minutes until pill time limit.
+                day, hour_with_min = timestamp.split(':', 1)  # => day = 0, hour_with_min = 8:30
                 obtained, current_prescription = self.__is_obtained_on_time(day, hour_with_min)
                 if not obtained:
                     self.send_alert(message=f"did not obtain a pill on {calendar.day_name[int(day)]},"
-                                            f" {hour_with_min}.")
-                self.__store_obtained(obtained, current_prescription['Collect_Id'])
-                if self.__is_prescription_time_passed(timestamp):
+                                            f" {hour_with_min}.")  # on Monday, 8:30
+                self.__store_obtained(obtained, current_prescription['Collect_Id'])  # update Collect table with is_obtained (true/false)
+                if self.__is_prescription_time_passed(timestamp):  # checks if obtaining is the last row in database.
                     break
             time.sleep(5)
-        self.send_alert(message=f"finished. test complete!")
 
     def __store_obtained(self, is_obtained, collect_id):
         self.__patient_model.update_prescription_obtain(is_obtained, collect_id)
